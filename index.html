@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#8B4513">
+    <title>PanApp FP - Tu asistente de panadería</title>
+    <link rel="manifest" href="manifest.webmanifest" />
+		<meta name="theme-color" content="#d6a96c" />
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #FFF8DC 0%, #F5DEB3 100%);
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(139, 69, 19, 0.1);
+            box-shadow: 0 8px 32px rgba(139, 69, 19, 0.1);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #8B4513, #A0522D);
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(139, 69, 19, 0.3);
+        }
+        .tool-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .tool-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 35px rgba(139, 69, 19, 0.2);
+        }
+        .active-tab {
+            background: #8B4513;
+            color: white;
+        }
+        .input-group {
+            margin-bottom: 1rem;
+        }
+        .result-highlight {
+            background: linear-gradient(135deg, #228B22, #32CD32);
+            color: white;
+            font-weight: bold;
+            padding: 1rem;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- Header -->
+    <header class="card sticky top-0 z-50 p-4 mb-6">
+        <div class="flex items-center justify-between max-w-6xl mx-auto">
+            <div class="flex items-center space-x-3">
+                <i class="fas fa-bread-slice text-3xl text-amber-700"></i>
+                <div>
+                    <h1 class="text-2xl font-bold text-amber-800">PanApp FP</h1>
+                    <p class="text-sm text-amber-600">Tu asistente de panadería profesional</p>
+                </div>
+            </div>
+            <button id="menuBtn" class="md:hidden btn-primary text-white p-2 rounded-lg">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="card max-w-6xl mx-auto mb-6 p-2">
+        <div class="flex flex-wrap gap-2 justify-center">
+            <button class="nav-tab active-tab px-4 py-2 rounded-lg transition-all" data-tab="dashboard">
+                <i class="fas fa-home mr-2"></i>Inicio
+            </button>
+            <button class="nav-tab px-4 py-2 rounded-lg transition-all" data-tab="calculadora">
+                <i class="fas fa-calculator mr-2"></i>Calculadora
+            </button>
+            <button class="nav-tab px-4 py-2 rounded-lg transition-all" data-tab="fichas">
+                <i class="fas fa-file-alt mr-2"></i>Fichas Técnicas
+            </button>
+            <button class="nav-tab px-4 py-2 rounded-lg transition-all" data-tab="alergenos">
+                <i class="fas fa-shield-alt mr-2"></i>Alérgenos
+            </button>
+            <button class="nav-tab px-4 py-2 rounded-lg transition-all" data-tab="conversor">
+                <i class="fas fa-exchange-alt mr-2"></i>Conversor
+            </button>
+            <button class="nav-tab px-4 py-2 rounded-lg transition-all" data-tab="planificacion">
+                <i class="fas fa-calendar mr-2"></i>Planificación
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-6xl mx-auto px-4 pb-8">
+        
+        <!-- Dashboard Tab -->
+        <div id="dashboard" class="tab-content">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                
+                <!-- Calculadora de Recetas -->
+                <div class="tool-card card p-6 rounded-xl">
+                    <div class="text-center">
+                        <i class="fas fa-calculator text-4xl text-amber-600 mb-4"></i>
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">Calculadora de Recetas</h3>
+                        <p class="text-gray-600 mb-4">Ajusta cantidades por raciones o peso total</p>
+                        <button class="btn-primary text-white px-6 py-2 rounded-lg" onclick="showTab('calculadora')">
+                            Usar Calculadora
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Fichas Técnicas -->
+                <div class="tool-card card p-6 rounded-xl">
+                    <div class="text-center">
+                        <i class="fas fa-file-alt text-4xl text-blue-600 mb-4"></i>
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">Fichas Técnicas</h3>
+                        <p class="text-gray-600 mb-4">Genera fichas profesionales de productos</p>
+                        <button class="btn-primary text-white px-6 py-2 rounded-lg" onclick="showTab('fichas')">
+                            Crear Ficha
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Gestor de Alérgenos -->
+                <div class="tool-card card p-6 rounded-xl">
+                    <div class="text-center">
+                        <i class="fas fa-shield-alt text-4xl text-red-600 mb-4"></i>
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">Gestor de Alérgenos</h3>
+                        <p class="text-gray-600 mb-4">Detecta alérgenos automáticamente</p>
+                        <button class="btn-primary text-white px-6 py-2 rounded-lg" onclick="showTab('alergenos')">
+                            Revisar Alérgenos
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Conversor de Unidades -->
+                <div class="tool-card card p-6 rounded-xl">
+                    <div class="text-center">
+                        <i class="fas fa-exchange-alt text-4xl text-green-600 mb-4"></i>
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">Conversor de Unidades</h3>
+                        <p class="text-gray-600 mb-4">Peso, volumen y temperatura</p>
+                        <button class="btn-primary text-white px-6 py-2 rounded-lg" onclick="showTab('conversor')">
+                            Convertir
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Planificador -->
+                <div class="tool-card card p-6 rounded-xl">
+                    <div class="text-center">
+                        <i class="fas fa-calendar text-4xl text-purple-600 mb-4"></i>
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">Planificador</h3>
+                        <p class="text-gray-600 mb-4">Organiza tu producción diaria</p>
+                        <button class="btn-primary text-white px-6 py-2 rounded-lg" onclick="showTab('planificacion')">
+                            Planificar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Ayuda -->
+                <div class="tool-card card p-6 rounded-xl">
+                    <div class="text-center">
+                        <i class="fas fa-question-circle text-4xl text-indigo-600 mb-4"></i>
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">Centro de Ayuda</h3>
+                        <p class="text-gray-600 mb-4">Tips y guías para usar la app</p>
+                        <button class="btn-primary text-white px-6 py-2 rounded-lg" onclick="showHelp()">
+                            Ver Ayuda
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Calculadora Tab -->
+        <div id="calculadora" class="tab-content hidden">
+            <div class="card p-6 rounded-xl">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                    <i class="fas fa-calculator mr-3 text-amber-600"></i>
+                    Calculadora de Recetas
+                </h2>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Entrada de datos -->
+                    <div>
+                        <h3 class="text-lg font-semibold mb-4">Datos de la Receta Original</h3>
+                        
+                        <div class="input-group">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Nombre del producto</label>
+                            <input type="text" id="nombreProducto" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500" placeholder="Ej: Pan de molde integral">
+                        </div>
+
+                        <div class="input-group">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Raciones originales</label>
+                            <input type="number" id="racionesOriginales" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500" placeholder="12" value="12">
+                        </div>
+
+                        <div class="input-group">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Raciones deseadas</label>
+                            <input type="number" id="racionesDeseadas" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500" placeholder="24">
+                        </div>
+
+                        <div class="space-y-3">
+                            <h4 class="font-medium">Ingredientes (cantidad en gramos)</h4>
+                            <div id="ingredientes">
+                                <div class="flex gap-2 mb-2">
+                                    <input type="text" placeholder="Ingrediente" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg ingrediente-nombre">
+                                    <input type="number" placeholder="Gramos" class="w-24 px-3 py-2 border border-gray-300 rounded-lg ingrediente-cantidad">
+                                    <button class="px-3 py-2 bg-red-500 text-white rounded-lg" onclick="eliminarIngrediente(this)">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <button class="btn-primary text-white px-4 py-2 rounded-lg" onclick="agregarIngrediente()">
+                                <i class="fas fa-plus mr-2"></i>Agregar Ingrediente
+                            </button>
+                        </div>
+
+                        <button class="w-full btn-primary text-white py-3 rounded-lg mt-6 text-lg font-semibold" onclick="calcularReceta()">
+                            <i class="fas fa-magic mr-2"></i>Calcular Nueva Receta
+                        </button>
+                    </div>
+
+                    <!-- Resultados -->
+                    <div>
+                        <h3 class="text-lg font-semibold mb-4">Receta Ajustada</h3>
+                        <div id="resultados" class="space-y-4">
+                            <p class="text-gray-500 text-center py-8">
+                                <i class="fas fa-arrow-left mr-2"></i>
+                                Completa los datos y presiona "Calcular" para ver los resultados
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fichas Técnicas Tab -->
+        <div id="fichas" class="tab-content hidden">
+            <div class="card p-6 rounded-xl">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                    <i class="fas fa-file-alt mr-3 text-blue-600"></i>
+                    Generador de Fichas Técnicas
+                </h2>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div>
+                        <div class="input-group">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Nombre del Producto</label>
+                            <input type="text" id="fichaNombre" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Pan artesano de centeno">
+                        </div>
+
+                        <div class="input-group">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Descripción</label>
+                            <textarea id="fichaDescripcion" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Descripción del producto, características..."></textarea>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="input-group">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Peso (g)</label>
+                                <input type="number" id="fichaPeso" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="500">
+                            </div>
+                            <div class="input-group">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Precio (€)</label>
+                                <input type="number" step="0.01" id="fichaPrecio" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="3.50">
+                            </div>
+                        </div>
+
+                        <div class="input-group">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Tiempo de elaboración (min)</label>
+                            <input type="number" id="fichaTiempo" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="180">
+                        </div>
+
+                        <div class="input-group">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Temperatura de cocción (°C)</label>
+                            <input type="number" id="fichaTemperatura" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="220">
+                        </div>
+
+                        <button class="w-full btn-primary text-white py-3 rounded-lg text-lg font-semibold" onclick="generarFicha()">
+                            <i class="fas fa-file-export mr-2"></i>Generar Ficha Técnica
+                        </button>
+                    </div>
+
+                    <div>
+                        <h3 class="text-lg font-semibold mb-4">Vista Previa de la Ficha</h3>
+                        <div id="fichaPreview" class="border-2 border-dashed border-gray-300 rounded-lg p-6 h-96 overflow-y-auto">
+                            <p class="text-gray-500 text-center">La ficha técnica aparecerá aquí</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alérgenos Tab -->
+        <div id="alergenos" class="tab-content hidden">
+            <div class="card p-6 rounded-xl">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                    <i class="fas fa-shield-alt mr-3 text-red-600"></i>
+                    Detector de Alérgenos
+                </h2>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div>
+                        <div class="input-group">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Lista de Ingredientes</label>
+                            <textarea id="ingredientesAlergenos" rows="8" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Escribe los ingredientes separados por comas:&#10;harina de trigo, huevos, leche, mantequilla, azúcar, levadura, sal..."></textarea>
+                        </div>
+
+                        <button class="w-full btn-primary text-white py-3 rounded-lg text-lg font-semibold" onclick="detectarAlergenos()">
+                            <i class="fas fa-search mr-2"></i>Detectar Alérgenos
+                        </button>
+                    </div>
+
+                    <div>
+                        <h3 class="text-lg font-semibold mb-4">Alérgenos Detectados</h3>
+                        <div id="alergenosResultado" class="space-y-3">
+                            <p class="text-gray-500 text-center py-8">Introduce los ingredientes para detectar alérgenos</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Conversor Tab -->
+        <div id="conversor" class="tab-content hidden">
+            <div class="card p-6 rounded-xl">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                    <i class="fas fa-exchange-alt mr-3 text-green-600"></i>
+                    Conversor de Unidades
+                </h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Peso -->
+                    <div class="card p-4 rounded-lg border">
+                        <h3 class="text-lg font-semibold mb-4 text-center">Peso</h3>
+                        <div class="space-y-3">
+                            <input type="number" id="pesoInput" class="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="Cantidad">
+                            <select id="pesoFrom" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                                <option value="g">Gramos</option>
+                                <option value="kg">Kilogramos</option>
+                                <option value="lb">Libras</option>
+                                <option value="oz">Onzas</option>
+                            </select>
+                            <div class="text-center">
+                                <i class="fas fa-arrow-down text-green-600"></i>
+                            </div>
+                            <select id="pesoTo" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                                <option value="kg">Kilogramos</option>
+                                <option value="g">Gramos</option>
+                                <option value="lb">Libras</option>
+                                <option value="oz">Onzas</option>
+                            </select>
+                            <div id="pesoResult" class="result-highlight text-center rounded-lg">
+                                0 kg
+                            </div>
+                            <button class="w-full btn-primary text-white py-2 rounded-lg" onclick="convertirPeso()">Convertir</button>
+                        </div>
+                    </div>
+
+                    <!-- Volumen -->
+                    <div class="card p-4 rounded-lg border">
+                        <h3 class="text-lg font-semibold mb-4 text-center">Volumen</h3>
+                        <div class="space-y-3">
+                            <input type="number" id="volumenInput" class="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="Cantidad">
+                            <select id="volumenFrom" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                                <option value="ml">Mililitros</option>
+                                <option value="l">Litros</option>
+                                <option value="cup">Tazas</option>
+                                <option value="tbsp">Cucharadas</option>
+                                <option value="tsp">Cucharaditas</option>
+                            </select>
+                            <div class="text-center">
+                                <i class="fas fa-arrow-down text-green-600"></i>
+                            </div>
+                            <select id="volumenTo" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                                <option value="l">Litros</option>
+                                <option value="ml">Mililitros</option>
+                                <option value="cup">Tazas</option>
+                                <option value="tbsp">Cucharadas</option>
+                                <option value="tsp">Cucharaditas</option>
+                            </select>
+                            <div id="volumenResult" class="result-highlight text-center rounded-lg">
+                                0 L
+                            </div>
+                            <button class="w-full btn-primary text-white py-2 rounded-lg" onclick="convertirVolumen()">Convertir</button>
+                        </div>
+                    </div>
+
+                    <!-- Temperatura -->
+                    <div class="card p-4 rounded-lg border">
+                        <h3 class="text-lg font-semibold mb-4 text-center">Temperatura</h3>
+                        <div class="space-y-3">
+                            <input type="number" id="tempInput" class="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="Temperatura">
+                            <select id="tempFrom" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                                <option value="c">Celsius (°C)</option>
+                                <option value="f">Fahrenheit (°F)</option>
+                                <option value="k">Kelvin (K)</option>
+                            </select>
+                            <div class="text-center">
+                                <i class="fas fa-arrow-down text-green-600"></i>
+                            </div>
+                            <select id="tempTo" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                                <option value="f">Fahrenheit (°F)</option>
+                                <option value="c">Celsius (°C)</option>
+                                <option value="k">Kelvin (K)</option>
+                            </select>
+                            <div id="tempResult" class="result-highlight text-center rounded-lg">
+                                0 °F
+                            </div>
+                            <button class="w-full btn-primary text-white py-2 rounded-lg" onclick="convertirTemperatura()">Convertir</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Planificación Tab -->
+        <div id="planificacion" class="tab-content hidden">
+            <div class="card p-6 rounded-xl">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                    <i class="fas fa-calendar mr-3 text-purple-600"></i>
+                    Planificador de Producción
+                </h2>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div>
+                        <h3 class="text-lg font-semibold mb-4">Agregar Tarea de Producción</h3>
+                        
+                        <div class="input-group">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Producto</label>
+                            <input type="text" id="planProducto" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Pan de molde">
+                        </div>
+
+                        <div class="input-group">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Cantidad</label>
+                            <input type="number" id="planCantidad" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="12">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="input-group">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Fecha</label>
+                                <input type="date" id="planFecha" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                            </div>
+                            <div class="input-group">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Hora</label>
+                                <input type="time" id="planHora" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                            </div>
+                        </div>
+
+                        <div class="input-group">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Notas</label>
+                            <textarea id="planNotas" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Observaciones especiales..."></textarea>
+                        </div>
+
+                        <button class="w-full btn-primary text-white py-3 rounded-lg text-lg font-semibold" onclick="agregarTarea()">
+                            <i class="fas fa-plus mr-2"></i>Agregar a Planificación
+                        </button>
+                    </div>
+
+                    <div>
+                        <h3 class="text-lg font-semibold mb-4">Planificación Actual</h3>
+                        <div id="listaTareas" class="space-y-3 max-h-96 overflow-y-auto">
+                            <p class="text-gray-500 text-center py-8">No hay tareas programadas</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Help Modal -->
+    <div id="helpModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="card max-w-2xl w-full p-6 rounded-xl">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-bold text-gray-800">Centro de Ayuda</h2>
+                    <button onclick="closeHelp()" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times text-2xl"></i>
+                    </button>
+                </div>
+                
+                <div class="space-y-4">
+                    <div class="border-l-4 border-amber-500 pl-4">
+                        <h3 class="font-semibold text-lg">🧮 Calculadora de Recetas</h3>
+                        <p class="text-gray-600">Introduce los ingredientes de tu receta original y el número de raciones. La app calculará automáticamente las cantidades para el número de raciones que necesites.</p>
+                    </div>
+                    
+                    <div class="border-l-4 border-blue-500 pl-4">
+                        <h3 class="font-semibold text-lg">📄 Fichas Técnicas</h3>
+                        <p class="text-gray-600">Crea fichas profesionales con toda la información de tus productos: ingredientes, tiempos, temperaturas y costes.</p>
+                    </div>
+                    
+                    <div class="border-l-4 border-red-500 pl-4">
+                        <h3 class="font-semibold text-lg">🛡️ Detector de Alérgenos</h3>
+                        <p class="text-gray-600">Escribe la lista de ingredientes y la app detectará automáticamente qué alérgenos contiene tu producto según la normativa europea.</p>
+                    </div>
+                    
+                    <div class="border-l-4 border-green-500 pl-4">
+                        <h3 class="font-semibold text-lg">🔄 Conversor de Unidades</h3>
+                        <p class="text-gray-600">Convierte fácilmente entre gramos y kilos, mililitros y litros, y temperaturas entre Celsius y Fahrenheit.</p>
+                    </div>
+                    
+                    <div class="border-l-4 border-purple-500 pl-4">
+                        <h3 class="font-semibold text-lg">📅 Planificador</h3>
+                        <p class="text-gray-600">Organiza tu producción diaria. Programa qué productos hacer, cuándo y en qué cantidades.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variables globales
+        let tareas = [];
+        let ingredientesCount = 1;
+
+        // Base de datos de alérgenos
+        const alergenosDB = {
+            'gluten': ['trigo', 'cebada', 'centeno', 'avena', 'espelta', 'kamut', 'harina', 'pan', 'pasta'],
+            'huevos': ['huevo', 'huevos', 'clara', 'yema', 'ovoalbúmina'],
+            'lácteos': ['leche', 'mantequilla', 'queso', 'yogur', 'nata', 'crema', 'suero', 'caseína', 'lactosa'],
+            'frutos secos': ['almendra', 'nuez', 'avellana', 'pistacho', 'anacardo', 'piñón', 'macadamia'],
+            'soja': ['soja', 'tofu', 'salsa de soja', 'lecitina de soja'],
+            'sésamo': ['sésamo', 'ajonjolí', 'tahini'],
+            'sulfitos': ['sulfito', 'e220', 'e221', 'e222', 'e223', 'e224', 'e225'],
+            'pescado': ['pescado', 'anchoa', 'bacalao', 'salmón', 'atún'],
+            'moluscos': ['almeja', 'mejillón', 'calamar', 'pulpo', 'ostra'],
+            'crustáceos': ['gamba', 'langosta', 'cangrejo', 'langostino'],
+            'apio': ['apio', 'apionabo'],
+            'mostaza': ['mostaza', 'semilla de mostaza'],
+            'altramuces': ['altramuz', 'lupino']
+        };
+
+        // Factores de conversión
+        const conversionesPeso = {
+            g: { kg: 0.001, lb: 0.00220462, oz: 0.035274 },
+            kg: { g: 1000, lb: 2.20462, oz: 35.274 },
+            lb: { g: 453.592, kg: 0.453592, oz: 16 },
+            oz: { g: 28.3495, kg: 0.0283495, lb: 0.0625 }
+        };
+
+        const conversionesVolumen = {
+            ml: { l: 0.001, cup: 0.00422675, tbsp: 0.067628, tsp: 0.202884 },
+            l: { ml: 1000, cup: 4.22675, tbsp: 67.628, tsp: 202.884 },
+            cup: { ml: 236.588, l: 0.236588, tbsp: 16, tsp: 48 },
+            tbsp: { ml: 14.7868, l: 0.0147868, cup: 0.0625, tsp: 3 },
+            tsp: { ml: 4.92892, l: 0.00492892, cup: 0.0208333, tbsp: 0.333333 }
+        };
+
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set today's date for planning
+            document.getElementById('planFecha').valueAsDate = new Date();
+            
+            // Add initial ingredient row
+            agregarIngrediente();
+            
+            // Auto-convert as user types
+            ['pesoInput', 'volumenInput', 'tempInput'].forEach(id => {
+                document.getElementById(id).addEventListener('input', function() {
+                    if (id === 'pesoInput') convertirPeso();
+                    else if (id === 'volumenInput') convertirVolumen();
+                    else if (id === 'tempInput') convertirTemperatura();
+                });
+            });
+        });
+
+        // Navegación entre tabs
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.add('hidden');
+            });
+            
+            // Remove active class from all nav tabs
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active-tab');
+            });
+            
+            // Show selected tab
+            document.getElementById(tabName).classList.remove('hidden');
+            
+            // Add active class to clicked nav tab
+            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active-tab');
+        }
+
+        // Event listeners for navigation
+        document.querySelectorAll('.nav-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                const tabName = this.getAttribute('data-tab');
+                showTab(tabName);
+            });
+        });
+
+        // Calculadora de recetas
+        function agregarIngrediente() {
+            const container = document.getElementById('ingredientes');
+            const div = document.createElement('div');
+            div.className = 'flex gap-2 mb-2';
+            div.innerHTML = `
+                <input type="text" placeholder="Ingrediente" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg ingrediente-nombre">
+                <input type="number" placeholder="Gramos" class="w-24 px-3 py-2 border border-gray-300 rounded-lg ingrediente-cantidad">
+                <button class="px-3 py-2 bg-red-500 text-white rounded-lg" onclick="eliminarIngrediente(this)">
+                    <i class="fas fa-trash"></i>
+                </button>
+            `;
+            container.appendChild(div);
+        }
+
+        function eliminarIngrediente(button) {
+            button.parentElement.remove();
+        }
+
+        function calcularReceta() {
+            const nombreProducto = document.getElementById('nombreProducto').value;
+            const racionesOriginales = parseFloat(document.getElementById('racionesOriginales').value);
+            const racionesDeseadas = parseFloat(document.getElementById('racionesDeseadas').value);
+
+            if (!nombreProducto || !racionesOriginales || !racionesDeseadas) {
+                alert('Por favor, completa todos los campos principales');
+                return;
+            }
+
+            const factor = racionesDeseadas / racionesOriginales;
+            const ingredientes = [];
+            
+            document.querySelectorAll('#ingredientes .flex').forEach(row => {
+                const nombre = row.querySelector('.ingrediente-nombre').value;
+                const cantidad = parseFloat(row.querySelector('.ingrediente-cantidad').value);
+                
+                if (nombre && cantidad) {
+                    ingredientes.push({
+                        nombre: nombre,
+                        cantidadOriginal: cantidad,
+                        cantidadNueva: Math.round(cantidad * factor * 100) / 100
+                    });
+                }
+            });
+
+            mostrarResultados(nombreProducto, racionesOriginales, racionesDeseadas, factor, ingredientes);
+        }
+
+        function mostrarResultados(nombre, original, deseadas, factor, ingredientes) {
+            const resultadosDiv = document.getElementById('resultados');
+            
+            let html = `
+                <div class="result-highlight mb-4">
+                    <h3 class="text-xl font-bold">${nombre}</h3>
+                    <p>Factor de conversión: ${factor.toFixed(2)}x</p>
+                    <p>De ${original} raciones → ${deseadas} raciones</p>
+                </div>
+                
+                <div class="space-y-2">
+                    <h4 class="font-semibold text-lg">Ingredientes ajustados:</h4>
+            `;
+
+            ingredientes.forEach(ing => {
+                html += `
+                    <div class="flex justify-between items-center bg-gray-50 p-3 rounded-lg">
+                        <span class="font-medium">${ing.nombre}</span>
+                        <div class="text-right">
+                            <div class="text-sm text-gray-500">${ing.cantidadOriginal}g → <strong>${ing.cantidadNueva}g</strong></div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += '</div>';
+            resultadosDiv.innerHTML = html;
+        }
+
+        // Fichas técnicas
+        function generarFicha() {
+            const nombre = document.getElementById('fichaNombre').value;
+            const descripcion = document.getElementById('fichaDescripcion').value;
+            const peso = document.getElementById('fichaPeso').value;
+            const precio = document.getElementById('fichaPrecio').value;
+            const tiempo = document.getElementById('fichaTiempo').value;
+            const temperatura = document.getElementById('fichaTemperatura').value;
+
+            if (!nombre) {
+                alert('Por favor, introduce al menos el nombre del producto');
+                return;
+            }
+
+            const fecha = new Date().toLocaleDateString('es-ES');
+            
+            const ficha = `
+                <div class="border-2 border-gray-300 rounded-lg p-6 bg-white">
+                    <div class="text-center border-b-2 border-amber-500 pb-4 mb-4">
+                        <h2 class="text-2xl font-bold text-amber-800">FICHA TÉCNICA</h2>
+                        <h3 class="text-xl font-semibold text-gray-700">${nombre}</h3>
+                        <p class="text-sm text-gray-500">Fecha: ${fecha}</p>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <strong>Peso:</strong> ${peso || 'No especificado'} g
+                        </div>
+                        <div>
+                            <strong>Precio:</strong> ${precio || 'No especificado'} €
+                        </div>
+                        <div>
+                            <strong>Tiempo:</strong> ${tiempo || 'No especificado'} min
+                        </div>
+                        <div>
+                            <strong>Temperatura:</strong> ${temperatura || 'No especificado'} °C
+                        </div>
+                    </div>
+                    
+                    ${descripcion ? `
+                    <div class="mb-4">
+                        <strong>Descripción:</strong>
+                        <p class="text-gray-700 mt-2">${descripcion}</p>
+                    </div>
+                    ` : ''}
+                    
+                    <div class="mt-6 pt-4 border-t border-gray-200">
+                        <p class="text-xs text-gray-500 text-center">
+                            Generado con PanApp FP - ${fecha}
+                        </p>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('fichaPreview').innerHTML = ficha;
+        }
+
+        // Detector de alérgenos
+        function detectarAlergenos() {
+            const ingredientesTexto = document.getElementById('ingredientesAlergenos').value.toLowerCase();
+            const ingredientesList = ingredientesTexto.split(',').map(i => i.trim());
+            
+            const alergenosEncontrados = new Set();
+            
+            ingredientesList.forEach(ingrediente => {
+                Object.keys(alergenosDB).forEach(alergeno => {
+                    alergenosDB[alergeno].forEach(palabra => {
+                        if (ingrediente.includes(palabra)) {
+                            alergenosEncontrados.add(alergeno);
+                        }
+                    });
+                });
+            });
+
+            mostrarAlergenosResultado(Array.from(alergenosEncontrados));
+        }
+
+        function mostrarAlergenosResultado(alergenos) {
+            const resultadoDiv = document.getElementById('alergenosResultado');
+            
+            if (alergenos.length === 0) {
+                resultadoDiv.innerHTML = `
+                    <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+                        <i class="fas fa-check-circle mr-2"></i>
+                        No se detectaron alérgenos principales
+                    </div>
+                `;
+                return;
+            }
+
+            let html = `
+                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                    <strong>¡Atención! Se detectaron ${alergenos.length} alérgenos:</strong>
+                </div>
+                <div class="space-y-2">
+            `;
+
+            alergenos.forEach(alergeno => {
+                html += `
+                    <div class="flex items-center justify-between bg-red-50 border border-red-200 rounded-lg p-3">
+                        <div class="flex items-center">
+                            <i class="fas fa-shield-alt text-red-500 mr-3"></i>
+                            <span class="font-semibold capitalize">${alergeno}</span>
+                        </div>
+                        <span class="text-xs bg-red-500 text-white px-2 py-1 rounded">ALÉRGENO</span>
+                    </div>
+                `;
+            });
+
+            html += '</div>';
+            resultadoDiv.innerHTML = html;
+        }
+
+        // Conversores
+        function convertirPeso() {
+            const input = parseFloat(document.getElementById('pesoInput').value);
+            const from = document.getElementById('pesoFrom').value;
+            const to = document.getElementById('pesoTo').value;
+            
+            if (isNaN(input)) {
+                document.getElementById('pesoResult').textContent = '0 ' + to;
+                return;
+            }
+
+            let resultado;
+            if (from === to) {
+                resultado = input;
+            } else {
+                resultado = input * conversionesPeso[from][to];
+            }
+
+            document.getElementById('pesoResult').textContent = 
+                resultado.toFixed(3) + ' ' + getUnitLabel(to, 'peso');
+        }
+
+        function convertirVolumen() {
+            const input = parseFloat(document.getElementById('volumenInput').value);
+            const from = document.getElementById('volumenFrom').value;
+            const to = document.getElementById('volumenTo').value;
+            
+            if (isNaN(input)) {
+                document.getElementById('volumenResult').textContent = '0 ' + getUnitLabel(to, 'volumen');
+                return;
+            }
+
+            let resultado;
+            if (from === to) {
+                resultado = input;
+            } else {
+                resultado = input * conversionesVolumen[from][to];
+            }
+
+            document.getElementById('volumenResult').textContent = 
+                resultado.toFixed(3) + ' ' + getUnitLabel(to, 'volumen');
+        }
+
+        function convertirTemperatura() {
+            const input = parseFloat(document.getElementById('tempInput').value);
+            const from = document.getElementById('tempFrom').value;
+            const to = document.getElementById('tempTo').value;
+            
+            if (isNaN(input)) {
+                document.getElementById('tempResult').textContent = '0 ' + getUnitLabel(to, 'temperatura');
+                return;
+            }
+
+            let resultado;
+            
+            // Convert to Celsius first
+            let celsius = input;
+            if (from === 'f') celsius = (input - 32) * 5/9;
+            else if (from === 'k') celsius = input - 273.15;
+            
+            // Convert from Celsius to target
+            if (to === 'c') resultado = celsius;
+            else if (to === 'f') resultado = celsius * 9/5 + 32;
+            else if (to === 'k') resultado = celsius + 273.15;
+
+            document.getElementById('tempResult').textContent = 
+                resultado.toFixed(1) + ' ' + getUnitLabel(to, 'temperatura');
+        }
+
+        function getUnitLabel(unit, type) {
+            const labels = {
+                peso: { g: 'g', kg: 'kg', lb: 'lb', oz: 'oz' },
+                volumen: { ml: 'ml', l: 'L', cup: 'tazas', tbsp: 'cdas', tsp: 'cditas' },
+                temperatura: { c: '°C', f: '°F', k: 'K' }
+            };
+            return labels[type][unit] || unit;
+        }
+
+        // Planificador
+        function agregarTarea() {
+            const producto = document.getElementById('planProducto').value;
+            const cantidad = document.getElementById('planCantidad').value;
+            const fecha = document.getElementById('planFecha').value;
+            const hora = document.getElementById('planHora').value;
+            const notas = document.getElementById('planNotas').value;
+
+            if (!producto || !cantidad || !fecha) {
+                alert('Por favor, completa los campos obligatorios');
+                return;
+            }
+
+            const tarea = {
+                id: Date.now(),
+                producto,
+                cantidad,
+                fecha,
+                hora: hora || '08:00',
+                notas,
+                completada: false
+            };
+
+            tareas.push(tarea);
+            actualizarListaTareas();
+            limpiarFormularioPlan();
+        }
+
+        function actualizarListaTareas() {
+            const lista = document.getElementById('listaTareas');
+            
+            if (tareas.length === 0) {
+                lista.innerHTML = '<p class="text-gray-500 text-center py-8">No hay tareas programadas</p>';
+                return;
+            }
+
+            // Sort tasks by date and time
+            tareas.sort((a, b) => {
+                const dateA = new Date(a.fecha + ' ' + a.hora);
+                const dateB = new Date(b.fecha + ' ' + b.hora);
+                return dateA - dateB;
+            });
+
+            let html = '';
+            tareas.forEach(tarea => {
+                const fechaFormateada = new Date(tarea.fecha).toLocaleDateString('es-ES');
+                html += `
+                    <div class="card p-4 rounded-lg border-l-4 ${tarea.completada ? 'border-green-500 bg-green-50' : 'border-purple-500'}">
+                        <div class="flex justify-between items-start">
+                            <div class="flex-1">
+                                <h4 class="font-semibold text-lg ${tarea.completada ? 'line-through text-gray-500' : ''}">${tarea.producto}</h4>
+                                <p class="text-gray-600">Cantidad: ${tarea.cantidad} unidades</p>
+                                <p class="text-gray-600">📅 ${fechaFormateada} - 🕒 ${tarea.hora}</p>
+                                ${tarea.notas ? `<p class="text-sm text-gray-500 mt-2">📝 ${tarea.notas}</p>` : ''}
+                            </div>
+                            <div class="flex gap-2">
+                                <button onclick="toggleTarea(${tarea.id})" class="${tarea.completada ? 'bg-green-500' : 'bg-gray-400'} text-white px-3 py-1 rounded text-sm">
+                                    ${tarea.completada ? '✓' : '○'}
+                                </button>
+                                <button onclick="eliminarTarea(${tarea.id})" class="bg-red-500 text-white px-3 py-1 rounded text-sm">
+                                    🗑️
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            lista.innerHTML = html;
+        }
+
+        function toggleTarea(id) {
+            const tarea = tareas.find(t => t.id === id);
+            if (tarea) {
+                tarea.completada = !tarea.completada;
+                actualizarListaTareas();
+            }
+        }
+
+        function eliminarTarea(id) {
+            tareas = tareas.filter(t => t.id !== id);
+            actualizarListaTareas();
+        }
+
+        function limpiarFormularioPlan() {
+            document.getElementById('planProducto').value = '';
+            document.getElementById('planCantidad').value = '';
+            document.getElementById('planHora').value = '';
+            document.getElementById('planNotas').value = '';
+        }
+
+        // Modal de ayuda
+        function showHelp() {
+            document.getElementById('helpModal').classList.remove('hidden');
+        }
+
+        function closeHelp() {
+            document.getElementById('helpModal').classList.add('hidden');
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('helpModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeHelp();
+            }
+        });
+    </script>
+		
+		<script>
+		if ('serviceWorker' in navigator) {
+			navigator.serviceWorker.register('./sw.js')
+							 .catch(err => console.error('SW fail', err));
+		}
+		</script>
+
+		
+</body>
+</html>

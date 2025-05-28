@@ -1,0 +1,13 @@
+{
+  "name": "PanApp · Recetas y Gestión Obrador",
+  "short_name": "PanApp",
+  "description": "Calculadora de recetas, fichas técnicas y planificación de producción para panaderías y pastelerías.",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#faf5ef",
+  "theme_color": "#d6a96c",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
